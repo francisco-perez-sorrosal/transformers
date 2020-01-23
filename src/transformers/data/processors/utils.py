@@ -37,13 +37,15 @@ class InputExample(object):
         Only must be specified for sequence pair tasks.
         label: (Optional) string. The label of the example. This should be
         specified for train and dev examples, but not for test examples.
+        label_ids: In a multilabel classification problem, all the indexes of the active/positive labels
     """
 
-    def __init__(self, guid, text_a, text_b=None, label=None):
+    def __init__(self, guid, text_a, text_b=None, label=None, label_ids=None):
         self.guid = guid
         self.text_a = text_a
         self.text_b = text_b
         self.label = label
+        self.label_ids = label_ids
 
     def __repr__(self):
         return str(self.to_json_string())

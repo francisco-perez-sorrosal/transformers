@@ -753,7 +753,7 @@ class XLMForSequenceClassification(XLMPreTrainedModel):
 
     """
 
-    def __init__(self, config):
+    def __init__(self, config, **kwargs):
         super().__init__(config)
         self.num_labels = config.num_labels
 
@@ -761,6 +761,18 @@ class XLMForSequenceClassification(XLMPreTrainedModel):
         self.sequence_summary = SequenceSummary(config)
 
         self.init_weights()
+
+        self.class_weights_factory = kwargs.get('weight_loss_factory', None)
+        self.class_weights = None
+
+    def set_class_weights(self, train_label_freq_dist, total_number_of_documents, mu=1.0, smoothness=0.001):
+        init_args = {'label_frequency_distribution': train_label_freq_dist,
+                     'total_number_of_documents': total_number_of_documents,
+                     'mu': mu,
+                     'smoothness': smoothness}
+        logger.info(train_label_freq_dist)
+        logger.info(total_number_of_documents)
+        self.class_weights = self.class_weights_factory.get_weights('sigmoid', 'per_class', **init_args)
 
     def forward(
         self,
@@ -798,8 +810,17 @@ class XLMForSequenceClassification(XLMPreTrainedModel):
                 loss_fct = MSELoss()
                 loss = loss_fct(logits.view(-1), labels.view(-1))
             else:
-                loss_fct = CrossEntropyLoss()
-                loss = loss_fct(logits.view(-1, self.num_labels), labels.view(-1))
+                if self.config.multilabel:
+                    # logger.info("Multilabel model!")
+                    if self.training:
+                        logger.debug("Adding pos class weights")
+                        loss_fct = nn.BCEWithLogitsLoss(pos_weight=self.class_weights.cuda())
+                    else:
+                        loss_fct = nn.BCEWithLogitsLoss()
+                    loss = loss_fct(logits.view(-1, self.num_labels), labels)
+                else:
+                    loss_fct = CrossEntropyLoss()
+                    loss = loss_fct(logits.view(-1, self.num_labels), labels.view(-1))
             outputs = (loss,) + outputs
 
         return outputs

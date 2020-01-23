@@ -16,7 +16,7 @@
 
 try:
     from scipy.stats import pearsonr, spearmanr
-    from sklearn.metrics import matthews_corrcoef, f1_score
+    from sklearn.metrics import matthews_corrcoef, f1_score, accuracy_score
 
     _has_sklearn = True
 except (AttributeError, ImportError):
@@ -31,6 +31,17 @@ if _has_sklearn:
 
     def simple_accuracy(preds, labels):
         return (preds == labels).mean()
+
+    def acc_and_f1_multilabel(preds, labels):
+        print(labels)
+        print(preds)
+        acc = accuracy_score(labels, preds)
+        f1 = f1_score(y_true=labels, y_pred=preds)
+        return {
+            "acc": acc,
+            "f1": f1,
+            "acc_and_f1": (acc + f1) / 2,
+        }
 
     def acc_and_f1(preds, labels):
         acc = simple_accuracy(preds, labels)
@@ -81,5 +92,12 @@ if _has_sklearn:
         assert len(preds) == len(labels)
         if task_name == "xnli":
             return {"acc": simple_accuracy(preds, labels)}
+        else:
+            raise KeyError(task_name)
+
+    def toxic_compute_metrics(task_name, preds, labels):
+        assert len(preds) == len(labels)
+        if task_name == "classification":
+            return acc_and_f1_multilabel(preds, labels)
         else:
             raise KeyError(task_name)

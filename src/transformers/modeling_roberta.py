@@ -396,8 +396,13 @@ class RobertaForSequenceClassification(BertPreTrainedModel):
                 loss_fct = MSELoss()
                 loss = loss_fct(logits.view(-1), labels.view(-1))
             else:
-                loss_fct = CrossEntropyLoss()
-                loss = loss_fct(logits.view(-1, self.num_labels), labels.view(-1))
+                if self.config.multilabel:
+                    pos_weights = None if not self.training else (self.pos_weights if self.pos_weights is not None else self.state_dict().get('pos_weights', None))
+                    loss_fct = nn.BCEWithLogitsLoss(pos_weight=pos_weights)
+                    loss = loss_fct(logits.view(-1, self.num_labels), labels)
+                else:
+                    loss_fct = CrossEntropyLoss()
+                    loss = loss_fct(logits.view(-1, self.num_labels), labels.view(-1))
             outputs = (loss,) + outputs
 
         return outputs  # (loss), logits, (hidden_states), (attentions)

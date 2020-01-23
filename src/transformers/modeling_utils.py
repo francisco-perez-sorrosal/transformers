@@ -108,10 +108,29 @@ class PreTrainedModel(nn.Module, ModuleUtilsMixin):
             )
         # Save config in model
         self.config = config
+        # Weights for positive examples to be used during training in loss functions
+        self.pos_weights = kwargs.get('pos_weights', None)
+        if self.pos_weights is not None and isinstance(self.pos_weights, torch.Tensor):
+            self.pos_weights.detach_()  # Detach to avoid backward propagation in this tensor
 
     @property
     def base_model(self):
         return getattr(self, self.base_model_prefix, self)
+
+    def set_positive_weights(self, pos_weights):
+        """
+        Allows to set weights for positive examples to be used during training in loss functions.
+
+        Arguments:
+
+        :param pos_weights (Tensor): a weight of positive examples.
+                Must be a vector with length equal to the number of classes.
+        """
+        if self.pos_weights is not None:
+            logger.warning("Overwriting current positive_weights for training: {}".format(self.pos_weights))
+        self.pos_weights = torch.nn.Parameter(pos_weights)
+        if self.pos_weights is not None and isinstance(self.pos_weights, torch.Tensor):
+            self.pos_weights.detach_()  # Detach to avoid backward propagation in this tensor
 
     def get_input_embeddings(self):
         """ Get model's input embeddings

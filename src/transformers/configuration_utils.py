@@ -43,6 +43,7 @@ class PretrainedConfig(object):
         Parameters:
             ``finetuning_task``: string, default `None`. Name of the task used to fine-tune the model. This can be used when converting from an original (TensorFlow or PyTorch) checkpoint.
             ``num_labels``: integer, default `2`. Number of classes to use when the model is a classification model (sequences/tokens)
+            ``multilabel``: boolean, default `False`. If the model allows multiple classes when the model is a classification model (sequences/tokens)
             ``output_attentions``: boolean, default `False`. Should the model returns attentions weights.
             ``output_hidden_states``: string, default `False`. Should the model returns all hidden-states.
             ``torchscript``: string, default `False`. Is the model used with Torchscript.
@@ -79,6 +80,7 @@ class PretrainedConfig(object):
         # Fine-tuning task arguments
         self.finetuning_task = kwargs.pop("finetuning_task", None)
         self.num_labels = kwargs.pop("num_labels", 2)
+        self.multilabel = kwargs.pop('multilabel', False)
         self.id2label = kwargs.pop("id2label", {i: "LABEL_{}".format(i) for i in range(self.num_labels)})
         self.id2label = dict((int(key), value) for key, value in self.id2label.items())
         self.label2id = kwargs.pop("label2id", dict(zip(self.id2label.values(), self.id2label.keys())))

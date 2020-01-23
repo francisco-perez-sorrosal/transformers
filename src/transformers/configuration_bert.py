@@ -106,6 +106,14 @@ class BertConfig(PretrainedConfig):
             pretrained_config_archive_map (Dict[str, str]):
                 A dictionary containing all the available pre-trained checkpoints.
     """
+    _class_description = """
+    ===========================================================================
+    %s
+    ===========================================================================
+
+    Attributes:
+    -----------
+    """
     pretrained_config_archive_map = BERT_PRETRAINED_CONFIG_ARCHIVE_MAP
     model_type = "bert"
 
@@ -139,3 +147,10 @@ class BertConfig(PretrainedConfig):
         self.type_vocab_size = type_vocab_size
         self.initializer_range = initializer_range
         self.layer_norm_eps = layer_norm_eps
+
+    def __repr__(self):
+        col_width = max(len(word) for word, _ in self.__dict__.items()) + 2  # padding
+        representation = BertConfig._class_description % self.__class__.__name__
+        for attr, value in self.__dict__.items():
+            representation += "\t%s  %s\n" % (attr.ljust(col_width, ' '), value)
+        return representation

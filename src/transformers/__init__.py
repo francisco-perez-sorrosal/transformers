@@ -52,6 +52,10 @@ from .data import (
     glue_tasks_num_labels,
     is_sklearn_available,
     squad_convert_examples_to_features,
+    toxic_convert_examples_to_features,
+    toxic_output_modes,
+    toxic_processors,
+    toxic_tasks_num_labels,
     xnli_output_modes,
     xnli_processors,
     xnli_tasks_num_labels,
@@ -125,7 +129,7 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
 if is_sklearn_available():
-    from .data import glue_compute_metrics, xnli_compute_metrics
+    from .data import glue_compute_metrics, toxic_compute_metrics, xnli_compute_metrics
 
 
 # Modeling
